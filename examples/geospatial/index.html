@@ -75,7 +75,7 @@
             const statusLines = [];
             function showStatus(msg) {
                 statusLines.push(new Date().toLocaleTimeString() + ' - ' + msg);
-                if (statusLines.length > 5) statusLines.shift();
+                if (statusLines.length > 10) statusLines.shift();
                 statusEl.innerHTML = statusLines.join('<br>');
                 statusEl.scrollTop = statusEl.scrollHeight;
                 console.log('[status]', msg);
@@ -498,11 +498,13 @@
                 createRootNode().then(() => {
                     showStatus('Root node OK, starting render loop');
                     // List all session methods
-                    var methods = [];
-                    for (var k in session) {
-                        if (typeof session[k] === 'function') methods.push(k);
-                    }
-                    showStatus('Session methods: ' + methods.sort().join(','));
+                    try {
+                        var methods = [];
+                        for (var k in session) {
+                            if (typeof session[k] === 'function') methods.push(k);
+                        }
+                        showStatus('SessMeth: ' + methods.sort().join(','));
+                    } catch(e) { showStatus('SessMeth err: ' + e.message); }
                     // Monkey-patch rAF to verify it exists
                     showStatus('rAF type: ' + typeof session.requestAnimationFrame);
                     var _origRAF = session.requestAnimationFrame.bind(session);
