@@ -494,26 +494,40 @@
                 // Create a simple test scene and renderer
                 engine = new XREngine(canvas, glContext, true)
 
+                showStatus('Creating root node...');
                 createRootNode().then(() => {
-                    // Kick off rendering
+                    showStatus('Root node OK, starting render loop');
                     session.requestAnimationFrame(handleAnimationFrame)
+                }).catch(err => {
+                    showStatus('ERROR in createRootNode: ' + (err.message || err));
+                    statusEl.style.color = '#f44';
+                    console.error('createRootNode error:', err);
                 })
 
                 initializeScene()
             }
 
             async function createRootNode() {
-                let headFrameOfReference = await session.requestFrameOfReference('head-model')
-                eyeLevelFrameOfReference = await session.requestFrameOfReference('eye-level')
+                try {
+                    showStatus('createRoot: requesting head-model...');
+                    let headFrameOfReference = await session.requestFrameOfReference('head-model')
+                    showStatus('createRoot: requesting eye-level...');
+                    eyeLevelFrameOfReference = await session.requestFrameOfReference('eye-level')
+                    showStatus('createRoot: adding anchor...');
 
-                headFrameOfReference.getTransformTo(eyeLevelFrameOfReference, workingMatrix)
-                mat4.getTranslation(workingVec3, workingMatrix)
-                mat4.fromTranslation(workingMatrix, workingVec3)
+                    headFrameOfReference.getTransformTo(eyeLevelFrameOfReference, workingMatrix)
+                    mat4.getTranslation(workingVec3, workingMatrix)
+                    mat4.fromTranslation(workingMatrix, workingVec3)
 
-                let anchor = await session.addAnchor(workingMatrix, eyeLevelFrameOfReference)
-                engine.addAnchoredNode(anchor, engine.root)
-
-                return true
+                    let anchor = await session.addAnchor(workingMatrix, eyeLevelFrameOfReference)
+                    showStatus('createRoot: anchoring to engine...');
+                    engine.addAnchoredNode(anchor, engine.root)
+                    showStatus('createRoot: done!');
+                    return true
+                } catch(e) {
+                    showStatus('createRoot ERROR: ' + (e.message || String(e)));
+                    throw e;
+                }
             }
 
             // render loop
