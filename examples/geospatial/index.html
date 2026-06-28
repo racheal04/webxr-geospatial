@@ -18,20 +18,21 @@
             #status-overlay {
                 display: block;
                 position: fixed;
-                bottom: 20px;
-                left: 10px;
-                right: 10px;
+                top: 10px;
+                left: 5px;
+                right: 5px;
                 z-index: 9999;
-                background: rgba(0,0,0,0.85);
+                background: rgba(0,0,0,0.82);
                 color: #0f0;
                 font-family: monospace;
-                font-size: 12px;
-                padding: 12px;
-                border-radius: 8px;
-                max-height: 200px;
+                font-size: 10px;
+                padding: 6px 8px;
+                border-radius: 5px;
+                max-height: 80px;
                 overflow-y: auto;
                 pointer-events: none;
-                line-height: 1.4;
+                line-height: 1.25;
+                -webkit-overflow-scrolling: touch;
             }
             #go-button {
                 display: block;
@@ -67,8 +68,9 @@
             const statusLines = [];
             function showStatus(msg) {
                 statusLines.push(new Date().toLocaleTimeString() + ' - ' + msg);
-                if (statusLines.length > 15) statusLines.shift();
+                if (statusLines.length > 5) statusLines.shift();
                 statusEl.innerHTML = statusLines.join('<br>');
+                statusEl.scrollTop = statusEl.scrollHeight;
                 console.log('[status]', msg);
             }
 
