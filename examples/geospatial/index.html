@@ -497,7 +497,15 @@
                 showStatus('Creating root node...');
                 createRootNode().then(() => {
                     showStatus('Root node OK, starting render loop');
-                    session.requestAnimationFrame(handleAnimationFrame)
+                    // Monkey-patch rAF to verify it exists
+                    showStatus('rAF type: ' + typeof session.requestAnimationFrame);
+                    var _origRAF = session.requestAnimationFrame.bind(session);
+                    session.requestAnimationFrame = function(cb) {
+                        showStatus('rAF WRAPPED called!');
+                        return _origRAF(cb);
+                    };
+                    session.requestAnimationFrame(handleAnimationFrame);
+                    showStatus('rAF registered');
                 }).catch(err => {
                     showStatus('ERROR in createRootNode: ' + (err.message || err));
                     statusEl.style.color = '#f44';
