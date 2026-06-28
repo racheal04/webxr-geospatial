@@ -461,6 +461,13 @@
                     showStatus("ERROR: navigator.geolocation not available!");
                     statusEl.style.color = "#f44";
                 }
+                // Check Cesium (required by geospatial lib: window.hasOwnProperty("Cesium"))
+                if (typeof Cesium !== "undefined") {
+                    showStatus("Cesium exists - OK. hasOwnProperty:" + window.hasOwnProperty("Cesium"));
+                } else {
+                    showStatus("ERROR: Cesium not loaded!");
+                    statusEl.style.color = "#f44";
+                }
                 // Create the context where we will render our 3D scene
                 const canvas = document.createElement('canvas')
                 var glContext = canvas.getContext('webgl', {
