@@ -497,11 +497,29 @@
                 showStatus('Creating root node...');
                 createRootNode().then(() => {
                     showStatus('Root node OK, starting render loop');
-                    // List all session methods
+                    // Try to access polyfill internals to manually trigger _do_rAF
                     try {
-                        var keys = Object.getOwnPropertyNames(session).concat(Object.keys(Object.getPrototypeOf(session)||{}));
-                        showStatus('Sess keys(' + keys.length + '): ' + keys.slice(0,15).join(','));
-                    } catch(e2) { showStatus('Sess keys err: ' + e2.message); }
+                        var syms = Object.getOwnPropertySymbols(session);
+                        showStatus('Session symbols: ' + syms.length);
+                        for (var si = 0; si < syms.length; si++) {
+                            var priv = session[syms[si]];
+                            if (priv && priv.polyfill && priv.polyfill._arKitWrapper) {
+                                showStatus('Found _arKitWrapper!');
+                                window.__arKitWrapper = priv.polyfill._arKitWrapper;
+                                // Manually trigger _do_rAF periodically
+                                var doRAF = function() {
+                                    if (window.__arKitWrapper._do_rAF) {
+                                        window.__arKitWrapper._do_rAF();
+                                    }
+                                    window.requestAnimationFrame(doRAF);
+                                };
+                                doRAF();
+                                showStatus('Manual _do_rAF loop started');
+                                break;
+                            }
+                        }
+                        if (!window.__arKitWrapper) showStatus('Could not find _arKitWrapper');
+                    } catch(e2) { showStatus('Symbol search err: ' + e2.message); }
                     // Monkey-patch rAF to verify it exists
                     showStatus('rAF type: ' + typeof session.requestAnimationFrame);
                     var _origRAF = session.requestAnimationFrame.bind(session);
