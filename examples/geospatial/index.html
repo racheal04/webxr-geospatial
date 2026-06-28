@@ -138,9 +138,19 @@
 
             XRGeospatialAnchor.useEstimatedElevation(true, 1.3)
 
+            var _geoResolved = false;
+            var _geoResolveTime = 0;
+
             async function updateLoop () {
                 try {
                     let deviceCarto = await XRGeospatialAnchor.getDeviceCartographic()
+                    if (!_geoResolved) {
+                        _geoResolved = true;
+                        _geoResolveTime = Date.now();
+                        showStatus('Geolocation resolved! Lat:' +
+                            deviceCarto.latitude.toFixed(6) + ' Lng:' +
+                            deviceCarto.longitude.toFixed(6));
+                    }
                     let txt = textBox.myText + "<p>device altitude " + deviceCarto.height.toPrecision(6) + "</p>"
                     let defElev = await XRGeospatialAnchor.getDefaultElevation(deviceCarto)
                     txt = txt + "<p>estimated altitude " + defElev.toPrecision(6) + "</p>"
@@ -149,6 +159,16 @@
                     await XRGeospatialAnchor.useEstimatedElevation(true, 1.3)
                 } catch(e) {
                     console.warn('updateLoop error (no geo yet):', e.message);
+                }
+
+                // Geolocation watchdog: warn after waiting
+                if (!_geoResolved && session && (_geoResolveTime === 0)) {
+                    _geoResolveTime = Date.now();
+                }
+                if (!_geoResolved && session && (Date.now() - _geoResolveTime > 15000) && _geoResolveTime > 0) {
+                    showStatus('WARNING: No geolocation after 15s. Did you grant location permission?');
+                    statusEl.style.color = '#fa0';
+                    _geoResolveTime = -999999; // only warn once
                 }
 
                 await sleep(1000)
@@ -427,6 +447,20 @@
                 session = xrSession
                 document.body.insertBefore(xrCanvas, document.body.firstChild)
 
+
+                showStatus("AR session active. Checking XRGeospatialAnchor...");
+                if (typeof XRGeospatialAnchor !== "undefined") {
+                    showStatus("XRGeospatialAnchor exists - OK");
+                } else {
+                    showStatus("ERROR: XRGeospatialAnchor not defined!");
+                    statusEl.style.color = "#f44";
+                }
+                if (typeof navigator.geolocation !== "undefined") {
+                    showStatus("navigator.geolocation exists - OK");
+                } else {
+                    showStatus("ERROR: navigator.geolocation not available!");
+                    statusEl.style.color = "#f44";
+                }
                 // Create the context where we will render our 3D scene
                 const canvas = document.createElement('canvas')
                 var glContext = canvas.getContext('webgl', {
