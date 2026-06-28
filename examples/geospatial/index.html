@@ -517,6 +517,7 @@
             }
 
             // render loop
+            let _firstFrame = true;
             function handleAnimationFrame(t, frame){
                 if(!session || session.ended) return
                 session.requestAnimationFrame(handleAnimationFrame)
@@ -524,8 +525,19 @@
 
                 let pose = frame.getDevicePose(eyeLevelFrameOfReference)
                 if(!pose){
-                    console.log('No pose')
+                    if (_firstFrame) showStatus('WARN: No pose on first frame!');
                     return
+                }
+
+                if (_firstFrame) {
+                    _firstFrame = false;
+                    showStatus('Render OK: ' + frame.views.length + ' views, has pose');
+                    // Log cube position for debugging
+                    if (engine.root.children.length > 0) {
+                        var wp = new THREE.Vector3();
+                        engine.root.children[0].getWorldPosition(wp);
+                        showStatus('Cube world pos: ' + wp.x.toFixed(2) + ', ' + wp.y.toFixed(2) + ', ' + wp.z.toFixed(2));
+                    }
                 }
 
                 engine.startFrame()
