@@ -63,6 +63,13 @@
         <div id="status-overlay">Loading WebXR shim...</div>
         <button type=button id=go-button>Start AR</button>
         <script type=module>
+            // some dependencies and utilities
+            import * as mat4 from '../libs/gl-matrix/mat4.js'
+            import * as vec3 from '../libs/gl-matrix/vec3.js'
+
+            import XREngine from "../XREngine.js"
+            import XRInputManager from "../XRInputManager.js"
+
             // Status display helper
             const statusEl = document.getElementById('status-overlay');
             const statusLines = [];
@@ -73,13 +80,6 @@
                 statusEl.scrollTop = statusEl.scrollHeight;
                 console.log('[status]', msg);
             }
-
-            // some dependencies and utilities
-            import * as mat4 from '../libs/gl-matrix/mat4.js'
-            import * as vec3 from '../libs/gl-matrix/vec3.js'
-
-            import XREngine from "../XREngine.js"
-            import XRInputManager from "../XRInputManager.js"
 
             let device = null
             let session = null
