@@ -266,7 +266,18 @@
 
                 engine.addAmbientLight(0xffffff, 0.8)
 
-                // some tests
+                // DIRECT test cube: 2m in front, 0.5m below camera (no geospatial)
+                // If this cube is visible, rendering works, problem is geospatial
+                (function addTestCube() {
+                    var testGeo = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
+                    var testMat = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+                    var testCube = new THREE.Mesh(testGeo, testMat);
+                    testCube.position.set(0, -0.5, -2);
+                    engine.root.add(testCube);
+                    showStatus('RED test cube added at (0, -0.5, -2). Can you see it?');
+                })();
+
+                // Geolocated cubes (N/S/E/W)
                 XRGeospatialAnchor.getDeviceCartographic().then(cartographic => {
                     myGeoLoc = cartographic
                     console.log("device cartographic: ", myGeoLoc)
