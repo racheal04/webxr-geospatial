@@ -532,8 +532,13 @@
 
             // render loop
             let _firstFrame = true;
+            let _frameCount = 0;
             function handleAnimationFrame(t, frame){
-                if(!session || session.ended) return
+                // Unconditional first-call check
+                if (!_firstFrame) {} else { _firstFrame = false; showStatus('HRAF called! t=' + (t||0).toFixed(0) + ' frame=' + !!frame + ' views=' + (frame&&frame.views?frame.views.length:'?') + ' session=' + !!session); }
+                if(!session || session.ended) { if(session&&session.ended) showStatus('session.ended!'); return; }
+                _frameCount++;
+                if (_frameCount === 1) showStatus('Frame 1: pose check...');
                 session.requestAnimationFrame(handleAnimationFrame)
                 updateScene()
 
