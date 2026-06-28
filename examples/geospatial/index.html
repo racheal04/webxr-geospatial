@@ -497,6 +497,12 @@
                 showStatus('Creating root node...');
                 createRootNode().then(() => {
                     showStatus('Root node OK, starting render loop');
+                    // List all session methods
+                    var methods = [];
+                    for (var k in session) {
+                        if (typeof session[k] === 'function') methods.push(k);
+                    }
+                    showStatus('Session methods: ' + methods.sort().join(','));
                     // Monkey-patch rAF to verify it exists
                     showStatus('rAF type: ' + typeof session.requestAnimationFrame);
                     var _origRAF = session.requestAnimationFrame.bind(session);
@@ -504,6 +510,10 @@
                         showStatus('rAF WRAPPED called!');
                         return _origRAF(cb);
                     };
+                    // Also try browser rAF as fallback
+                    window.requestAnimationFrame(function() {
+                        showStatus('window.rAF works');
+                    });
                     session.requestAnimationFrame(handleAnimationFrame);
                     showStatus('rAF registered');
                 }).catch(err => {
